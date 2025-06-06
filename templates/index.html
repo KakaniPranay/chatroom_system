@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Chatroom</title>
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: sans-serif;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 25%;
+            border-right: 1px solid #ccc;
+            padding: 10px;
+            background-color: #f2f2f2;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-area {
+            width: 75%;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #chat-box {
+            flex-grow: 1;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 5px;
+            margin-bottom: 10px;
+            background-color: #fff;
+        }
+
+        #message {
+            width: 70%;
+        }
+
+        #user-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .user-entry {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .user-entry button {
+            font-size: 12px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .logout-btn {
+            background-color: #e74c3c;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="topbar">
+                <h3>Online Users</h3>
+                <form action="/logout" method="POST">
+                    <button class="logout-btn" type="submit">Logout</button>
+                </form>
+            </div>
+            <ul id="user-list"></ul>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-area">
+            <div id="chat-box"></div>
+            <div>
+                <input type="text" id="message" placeholder="Type your message..." />
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const username = "{{ session['username'] }}";
+        localStorage.setItem("username", username);
+        const socket = io();
+
+        // Join event
+        socket.emit("join", { username: username });
+
+        // Display incoming message
+        socket.on("receive_message", function (data) {
+            const box = document.getElementById("chat-box");
+            const div = document.createElement("div");
+            const time = new Date().toLocaleTimeString();
+            div.innerHTML = `<strong>${data.from}</strong> [${time}]: ${data.message}`;
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+        });
+
+        // Populate online users
+        socket.on("user_list", function (users) {
+            const ul = document.getElementById("user-list");
+            ul.innerHTML = "";
+            users.forEach(user => {
+                if (user !== username) {
+                    const li = document.createElement("li");
+                    li.className = "user-entry";
+                    li.innerHTML = `
+                        <span>${user}</span>
+                        <button onclick="privateMessage('${user}')">Message</button>
+                    `;
+                    ul.appendChild(li);
+                }
+            });
+        });
+
+        // Send public message
+        function sendMessage() {
+            const input = document.getElementById("message");
+            const msg = input.value.trim();
+            if (msg) {
+                socket.emit("send_message", { message: msg });
+                input.value = "";
+            }
+        }
+
+        // Trigger private message
+        function privateMessage(toUser) {
+            const msg = prompt(`Enter private message to ${toUser}:`);
+            if (msg && msg.trim()) {
+                socket.emit("private_message", {
+                    to: toUser,
+                    message: msg.trim()
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>

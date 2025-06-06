@@ -1,0 +1,224 @@
+[
+    {
+        "label": "Flask",
+        "importPath": "flask",
+        "description": "flask",
+        "isExtraImport": true,
+        "detail": "flask",
+        "documentation": {}
+    },
+    {
+        "label": "render_template",
+        "importPath": "flask",
+        "description": "flask",
+        "isExtraImport": true,
+        "detail": "flask",
+        "documentation": {}
+    },
+    {
+        "label": "request",
+        "importPath": "flask",
+        "description": "flask",
+        "isExtraImport": true,
+        "detail": "flask",
+        "documentation": {}
+    },
+    {
+        "label": "redirect",
+        "importPath": "flask",
+        "description": "flask",
+        "isExtraImport": true,
+        "detail": "flask",
+        "documentation": {}
+    },
+    {
+        "label": "url_for",
+        "importPath": "flask",
+        "description": "flask",
+        "isExtraImport": true,
+        "detail": "flask",
+        "documentation": {}
+    },
+    {
+        "label": "session",
+        "importPath": "flask",
+        "description": "flask",
+        "isExtraImport": true,
+        "detail": "flask",
+        "documentation": {}
+    },
+    {
+        "label": "SocketIO",
+        "importPath": "flask_socketio",
+        "description": "flask_socketio",
+        "isExtraImport": true,
+        "detail": "flask_socketio",
+        "documentation": {}
+    },
+    {
+        "label": "emit",
+        "importPath": "flask_socketio",
+        "description": "flask_socketio",
+        "isExtraImport": true,
+        "detail": "flask_socketio",
+        "documentation": {}
+    },
+    {
+        "label": "join_room",
+        "importPath": "flask_socketio",
+        "description": "flask_socketio",
+        "isExtraImport": true,
+        "detail": "flask_socketio",
+        "documentation": {}
+    },
+    {
+        "label": "leave_room",
+        "importPath": "flask_socketio",
+        "description": "flask_socketio",
+        "isExtraImport": true,
+        "detail": "flask_socketio",
+        "documentation": {}
+    },
+    {
+        "label": "sqlite3",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "sqlite3",
+        "description": "sqlite3",
+        "detail": "sqlite3",
+        "documentation": {}
+    },
+    {
+        "label": "generate_password_hash",
+        "importPath": "werkzeug.security",
+        "description": "werkzeug.security",
+        "isExtraImport": true,
+        "detail": "werkzeug.security",
+        "documentation": {}
+    },
+    {
+        "label": "check_password_hash",
+        "importPath": "werkzeug.security",
+        "description": "werkzeug.security",
+        "isExtraImport": true,
+        "detail": "werkzeug.security",
+        "documentation": {}
+    },
+    {
+        "label": "init_db",
+        "kind": 2,
+        "importPath": "server",
+        "description": "server",
+        "peekOfCode": "def init_db():\n    conn = sqlite3.connect('chat.db')\n    c = conn.cursor()\n    c.execute('''\n        CREATE TABLE IF NOT EXISTS users (\n            id INTEGER PRIMARY KEY AUTOINCREMENT,\n            username TEXT UNIQUE NOT NULL,\n            password TEXT NOT NULL\n        )\n    ''')",
+        "detail": "server",
+        "documentation": {}
+    },
+    {
+        "label": "home",
+        "kind": 2,
+        "importPath": "server",
+        "description": "server",
+        "peekOfCode": "def home():\n    if 'username' in session:\n        return redirect('/chat')\n    return redirect('/login')\n@app.route('/login', methods=['GET', 'POST'])\ndef login():\n    if request.method == 'POST':\n        username = request.form['username']\n        password = request.form['password']\n        conn = sqlite3.connect('chat.db')",
+        "detail": "server",
+        "documentation": {}
+    },
+    {
+        "label": "login",
+        "kind": 2,
+        "importPath": "server",
+        "description": "server",
+        "peekOfCode": "def login():\n    if request.method == 'POST':\n        username = request.form['username']\n        password = request.form['password']\n        conn = sqlite3.connect('chat.db')\n        c = conn.cursor()\n        c.execute(\"SELECT password FROM users WHERE username=?\", (username,))\n        user = c.fetchone()\n        conn.close()\n        if user and check_password_hash(user[0], password):",
+        "detail": "server",
+        "documentation": {}
+    },
+    {
+        "label": "register",
+        "kind": 2,
+        "importPath": "server",
+        "description": "server",
+        "peekOfCode": "def register():\n    if request.method == 'POST':\n        username = request.form['username']\n        password = generate_password_hash(request.form['password'])\n        try:\n            conn = sqlite3.connect('chat.db')\n            c = conn.cursor()\n            c.execute(\"INSERT INTO users (username, password) VALUES (?, ?)\", (username, password))\n            conn.commit()\n            conn.close()",
+        "detail": "server",
+        "documentation": {}
+    },
+    {
+        "label": "chat",
+        "kind": 2,
+        "importPath": "server",
+        "description": "server",
+        "peekOfCode": "def chat():\n    if 'username' not in session:\n        return redirect('/login')\n    return render_template('index.html')\n@app.route('/logout')\ndef logout():\n    session.pop('username', None)\n    return redirect('/login')\n# SocketIO\n@socketio.on('join')",
+        "detail": "server",
+        "documentation": {}
+    },
+    {
+        "label": "logout",
+        "kind": 2,
+        "importPath": "server",
+        "description": "server",
+        "peekOfCode": "def logout():\n    session.pop('username', None)\n    return redirect('/login')\n# SocketIO\n@socketio.on('join')\ndef handle_join(data):\n    username = session.get('username')\n    if not username:\n        return\n    sid = request.sid",
+        "detail": "server",
+        "documentation": {}
+    },
+    {
+        "label": "handle_join",
+        "kind": 2,
+        "importPath": "server",
+        "description": "server",
+        "peekOfCode": "def handle_join(data):\n    username = session.get('username')\n    if not username:\n        return\n    sid = request.sid\n    active_users[sid] = username\n    join_room(\"main\")\n    emit('receive_message', f\"{username} has joined the chat.\", room=\"main\")\n    emit('user_list', list(active_users.values()), broadcast=True)\n@socketio.on('send_message')",
+        "detail": "server",
+        "documentation": {}
+    },
+    {
+        "label": "handle_send_message",
+        "kind": 2,
+        "importPath": "server",
+        "description": "server",
+        "peekOfCode": "def handle_send_message(data):\n    sender = active_users.get(request.sid, \"Anonymous\")\n    msg = data['message']\n    # Private message format: @username message\n    if msg.startswith(\"@\"):\n        try:\n            recipient_name, private_msg = msg[1:].split(\" \", 1)\n            for sid, name in active_users.items():\n                if name == recipient_name:\n                    emit('receive_message', f\"[Private] {sender}: {private_msg}\", room=sid)",
+        "detail": "server",
+        "documentation": {}
+    },
+    {
+        "label": "handle_disconnect",
+        "kind": 2,
+        "importPath": "server",
+        "description": "server",
+        "peekOfCode": "def handle_disconnect():\n    sid = request.sid\n    username = active_users.pop(sid, \"Unknown\")\n    emit('receive_message', f\"{username} has left the chat.\", room=\"main\")\n    emit('user_list', list(active_users.values()), broadcast=True)\nif __name__ == '__main__':\n    socketio.run(app, debug=True)",
+        "detail": "server",
+        "documentation": {}
+    },
+    {
+        "label": "app",
+        "kind": 5,
+        "importPath": "server",
+        "description": "server",
+        "peekOfCode": "app = Flask(__name__)\napp.secret_key = 'your_secret_key'\nsocketio = SocketIO(app)\nactive_users = {}\n# Database setup\ndef init_db():\n    conn = sqlite3.connect('chat.db')\n    c = conn.cursor()\n    c.execute('''\n        CREATE TABLE IF NOT EXISTS users (",
+        "detail": "server",
+        "documentation": {}
+    },
+    {
+        "label": "app.secret_key",
+        "kind": 5,
+        "importPath": "server",
+        "description": "server",
+        "peekOfCode": "app.secret_key = 'your_secret_key'\nsocketio = SocketIO(app)\nactive_users = {}\n# Database setup\ndef init_db():\n    conn = sqlite3.connect('chat.db')\n    c = conn.cursor()\n    c.execute('''\n        CREATE TABLE IF NOT EXISTS users (\n            id INTEGER PRIMARY KEY AUTOINCREMENT,",
+        "detail": "server",
+        "documentation": {}
+    },
+    {
+        "label": "socketio",
+        "kind": 5,
+        "importPath": "server",
+        "description": "server",
+        "peekOfCode": "socketio = SocketIO(app)\nactive_users = {}\n# Database setup\ndef init_db():\n    conn = sqlite3.connect('chat.db')\n    c = conn.cursor()\n    c.execute('''\n        CREATE TABLE IF NOT EXISTS users (\n            id INTEGER PRIMARY KEY AUTOINCREMENT,\n            username TEXT UNIQUE NOT NULL,",
+        "detail": "server",
+        "documentation": {}
+    },
+    {
+        "label": "active_users",
+        "kind": 5,
+        "importPath": "server",
+        "description": "server",
+        "peekOfCode": "active_users = {}\n# Database setup\ndef init_db():\n    conn = sqlite3.connect('chat.db')\n    c = conn.cursor()\n    c.execute('''\n        CREATE TABLE IF NOT EXISTS users (\n            id INTEGER PRIMARY KEY AUTOINCREMENT,\n            username TEXT UNIQUE NOT NULL,\n            password TEXT NOT NULL",
+        "detail": "server",
+        "documentation": {}
+    }
+]
